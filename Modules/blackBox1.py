@@ -25,5 +25,3 @@ if __name__ == "__main__":
     for i in list:
         blackBoxTest = blackBox(4, 0, i)
         blackBoxTest.get_output()
-    
-    
