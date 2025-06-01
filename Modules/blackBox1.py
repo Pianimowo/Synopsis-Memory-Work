@@ -5,28 +5,25 @@ class blackBox:
         self.control = control
 
 
-        from Modules.universalFunctions import decoder
+        from universalFunctions import decoder
+        
 
         self.newcontrol = decoder(self.control)
 
         size_of_gap = (self.input_voltage-self.ground)/float(2**len(self.control))
 
 
-        self.output = self.ground + (size_of_gap*self.newcontrol)
+        self.output = self.ground + (size_of_gap*self.newcontrol + size_of_gap/2)
 
     def get_output(self):
         print(self.output)
 
 
-
-
-def test():
-    print("Hello")
-
-
-
-
-
 if __name__ == "__main__":
-    blackBoxTest = blackBox(4, 0, [0, 1, 1, 1])
-    blackBoxTest.get_output()
+    from universalFunctions import binaryInputs
+    list = binaryInputs(4)
+    for i in list:
+        blackBoxTest = blackBox(4, 0, i)
+        blackBoxTest.get_output()
+    
+    

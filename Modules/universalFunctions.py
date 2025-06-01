@@ -9,3 +9,18 @@ def decoder (binary):
         counter += 1
 
     return decimal
+
+def binaryInputs (num):
+    decimal = 2**num
+    bitList = [[0 for x in range(num)] for y in range(decimal)]
+
+    for i in range (num):
+        index = 0
+        for j in range(int(decimal/(2**(i+1)))):
+            index = (2**i)*((2*j)+1)
+            for k in range(2**i):
+                bitList[index+k][num-i-1] = 1
+
+    print(bitList)
+
+    return bitList
