@@ -15,7 +15,7 @@ def decoder (binary):
 def binaryInputs (num):
     bitList = [list(bits) for bits in product([0, 1], repeat=num)]
 
-    print(bitList)
+    # print(bitList)
     return bitList
 
     # decimal = 2**num
@@ -28,5 +28,9 @@ def binaryInputs (num):
     #         for k in range(2**i):
     #             bitList[index+k][num-i-1] = 1
 
-    
+def compare(input, VRR):
+    if input >= VRR:
+        return 1
+    else:
+        return 0
     

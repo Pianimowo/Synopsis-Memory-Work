@@ -1,4 +1,4 @@
-class blackBox:
+class resistorLadder:
     def __init__(self, input_voltage, ground, control):
         self.input_voltage = input_voltage
         self.ground = ground
@@ -22,6 +22,7 @@ class blackBox:
 if __name__ == "__main__":
     from universalFunctions import binaryInputs
     list = binaryInputs(4)
-    for i in list:
-        blackBoxTest = blackBox(4, 0, i)
+    for i in range(len(list)):
+        print(list[i])     
+        blackBoxTest = resistorLadder(4, 0, list[i])
         blackBoxTest.get_output()
