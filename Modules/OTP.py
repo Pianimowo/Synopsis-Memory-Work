@@ -1,4 +1,7 @@
 import math
+import numpy as np
+from universalFunctions import compare
+from universalFunctions import decoder
 
 class OTP:
     def __init__(self, size, VDD, VPP, VRR):
@@ -7,39 +10,38 @@ class OTP:
         self.VRR = VRR
         self.size = size
 
-
-        
         self.len = int(math.log(self.size[0], 2))
         self.wid = int(math.log(self.size[1], 2))
 
         self.grid = [[0 for _ in range(size[0])] for _ in range(size[1])]
 
-    def run(self, A, D, SEL, WE):
-        from universalFunctions import compare
-        from universalFunctions import decoder
+    # def createGrid(self, A, D, SEL, WE):
 
-        compD = compare(D, self.VRR)
-        compSEL = compare(SEL, self.VRR)
-        compWE = compare(WE, self.VRR)
+
+    def edit(self, A, D, SEL, WE):
+
+        D = D*self.VDD
 
         row = decoder(A[0:int(self.len)])
         col = decoder(A[int(self.len):len(A)])
 
-        if compWE == 1:
-            self.write(row, col, compD, compSEL)
+        if WE == 1:
+            self.write(row, col, D, SEL)
         else:
-            self.read(row, col, compSEL)
+            self.read(row, col, SEL)
 
         for i in self.grid:
             print(i)
 
     def write(self, row, col, D, SEL):
         if SEL > 0:
+            with open("Data\memoryGrid.txt","w") as f:
+                f.write("write")
             self.grid[row][col] = D
 
     def read(self, row, col, SEL):
         if SEL > 0:
-            out = self.grid[row][col]
+            out = compare(self.grid[row][col], self.VRR)
             print(out)
 
 
@@ -48,4 +50,4 @@ class OTP:
 
 if __name__ == "__main__":
     test = OTP([8, 8], 5, 8, 0.4)
-    test.run([0, 0, 1, 0, 1, 0], 5, 5, 5)
+    test.edit([0, 0, 1, 0, 1, 0], 1, 1, 1)
