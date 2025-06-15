@@ -31,8 +31,9 @@ class OTP:
 
         _D = _D*self._VDD
 
-        row = decoder(_A[0:int(length)])
-        col = decoder(_A[int(length):len(_A)])
+        row = decoder(_A[int(length):len(_A)])
+        col = decoder(_A[0:int(length)])
+
         if _WE == 1:
             self.write(row, col, _D, _SEL)
         else:
@@ -48,8 +49,9 @@ class OTP:
             print(compare(out, self._VRR))
 
     def generateNoise(self):
-        self.multipliers = np.random.normal(loc=0.9, scale = 0.05, size = self.memory.shape)
-        self.multipliers = np.clip(self.multipliers, 0.0, 1.0)
+        self.multipliers = np.random.normal(loc=1.0, scale = 0.05, size = self.memory.shape)
+        # self.multipliers = np.clip(self.multipliers, 0.0, 1.0)
+        print(self.multipliers)
 
     def save(self):
         np.save("Data/memoryGrid.npy", self.memory)
@@ -124,7 +126,7 @@ class OTP:
 
 if __name__ == "__main__":
     test = OTP(5, 8, 0.4)
-    test.loadGrid()
-    test.edit([0, 0, 0, 0, 0, 0, 0, 0], 1, 1, 1)
+    test.createGrid(8, 8)
+    test.edit([0, 0, 1, 0, 1, 0], 1, 1, 1)
     test.getGrid()
     test.save()
