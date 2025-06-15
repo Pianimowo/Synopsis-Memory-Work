@@ -14,6 +14,7 @@ class OTP:
         self._WE = 0
         self.multipliers = None
         self.memory = None
+        self._suppress_update = False
 
     def createGrid(self, rows, cols):
         self.memory = np.zeros((rows, cols), dtype=np.float32)
@@ -24,20 +25,23 @@ class OTP:
         self.generateNoise()
 
     def _update_logic(self):
-        return
+        if self._suppress_update:
+            return
+        if self._A is None or self.memory is None:
+            return
+        
+        length = math.log2(self.memory.shape[0])
+        row = decoder(self._A[int(length):len(self._A)])
+        col = decoder(self._A[0:int(length)])
 
-    def edit(self, _A, _D, _SEL, _WE):
-        length = math.log(self.memory.shape[0], 2)
+        # print(self._D)
 
-        _D = _D*self._VDD
-
-        row = decoder(_A[int(length):len(_A)])
-        col = decoder(_A[0:int(length)])
-
-        if _WE == 1:
-            self.write(row, col, _D, _SEL)
-        else:
-            self.read(row, col, _SEL)
+        if self._SEL == 1:
+            if self._WE == 1:
+                self._D = self._D*self._VDD
+                self.write(row, col, self._D, self._SEL)
+            else:
+                self.read(row, col, self._SEL)
 
     def write(self, row, col, _D, _SEL):
         if _SEL > 0:
@@ -51,12 +55,25 @@ class OTP:
     def generateNoise(self):
         self.multipliers = np.random.normal(loc=1.0, scale = 0.05, size = self.memory.shape)
         # self.multipliers = np.clip(self.multipliers, 0.0, 1.0)
-        print(self.multipliers)
+        # print(self.multipliers)
 
     def save(self):
         np.save("Data/memoryGrid.npy", self.memory)
 
-    
+    def set_inputs(self, A=None, D=None, SEL=None, WE=None):
+        self._suppress_update = True  # prevent logic update during batch assignment
+        if A is not None:
+            self._A = A
+        if D is not None:
+            self._D = D
+        if SEL is not None:
+            self._SEL = SEL
+        if WE is not None:
+            self._WE = WE
+        self._suppress_update = False
+        self._update_logic()  # 
+
+
     @property
     def VDD(self):
         return self._VDD
@@ -82,7 +99,7 @@ class OTP:
     @VRR.setter
     def VRR(self, value):
         self._VRR = value
-        self._update_logic
+        self._update_logic()
     
     @property
     def A(self):
@@ -91,7 +108,7 @@ class OTP:
     @A.setter
     def A(self, value):
         self._A = value
-        self._update_logic
+        self._update_logic()
     
     @property
     def D(self):
@@ -100,7 +117,7 @@ class OTP:
     @D.setter
     def D(self, value):
         self._D = value
-        self._update_logic
+        self._update_logic()
     
     @property
     def SEL(self):
@@ -109,7 +126,7 @@ class OTP:
     @SEL.setter
     def SEL(self, value):
         self._SEL = value
-        self._update_logic
+        self._update_logic()
     
     @property
     def WE(self):
@@ -118,7 +135,7 @@ class OTP:
     @WE.setter
     def WE(self, value):
         self._WE = value
-        self._update_logic
+        self._update_logic()
 
     def getGrid(self):
         for row in self.memory:
@@ -127,6 +144,11 @@ class OTP:
 if __name__ == "__main__":
     test = OTP(5, 8, 0.4)
     test.createGrid(8, 8)
-    test.edit([0, 0, 1, 0, 1, 0], 1, 1, 1)
+    test.set_inputs(
+        A = [0, 0, 1, 0, 1, 0],
+        SEL = 1,
+        D = 1,
+        WE = 1
+    )
     test.getGrid()
     test.save()
