@@ -21,8 +21,6 @@ class OTP:
     def edit(self, A, D, SEL, WE):
         length = math.log(self.memory.shape[0], 2)
 
-        print(length)
-
         D = D*self.VDD
 
         row = decoder(A[0:int(length)])
@@ -44,17 +42,14 @@ class OTP:
     def read(self, row, col, SEL):
         if SEL > 0:
             out = self.memory[row, col]
-            print(out)
+            print(compare(out, self.VRR))
 
     def getGrid(self):
         memoryGrid = np.load("Data/memoryGrid.npy").astype(int)
         print(memoryGrid)
 
-    def test(self):
-        print("test")
-
 if __name__ == "__main__":
     test = OTP(5, 8, 0.4)
     test.loadGrid()
-    test.edit([0, 0, 0, 1, 0, 1, 0], 1, 1, 1)
+    test.edit([0, 0, 0, 1, 0, 1, 0], 1, 1, 0)
     test.getGrid()
