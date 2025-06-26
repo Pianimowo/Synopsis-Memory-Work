@@ -1,3 +1,5 @@
+from universalFunctions import decoder
+
 class blackBox:
     def __init__(self, input_voltage, ground, control):
         self.input_voltage = input_voltage
@@ -5,7 +7,7 @@ class blackBox:
         self.control = control
 
 
-        from Modules.universalFunctions import decoder
+
 
         self.newcontrol = decoder(self.control)
 

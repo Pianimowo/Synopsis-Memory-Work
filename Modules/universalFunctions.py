@@ -1,5 +1,13 @@
 from itertools import product
 
+def encoder (num):
+    binary = bin(num)[2:]
+    binArr = []
+    for i in range(len(binary)):
+        binArr.append(int(binary[i]))
+    return binArr
+
+
 def decoder (binary):
     decimal = 0
     digit = 0
@@ -22,3 +30,6 @@ def compare(input, VRR):
     else:
         return 0
     
+
+if __name__ == "__main__":
+    print(encoder(5))

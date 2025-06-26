@@ -1,7 +1,6 @@
 import math
 import numpy as np
-from universalFunctions import compare
-from universalFunctions import decoder
+from universalFunctions import *
 
 class OTP:
     def __init__(self, _VDD, _VPP, _VRR):
@@ -9,20 +8,27 @@ class OTP:
         self._VPP = _VPP
         self._VRR = _VRR
         self._A = None
-        self._D = 0
         self._SEL = 0
         self._WE = 0
+        self._dIn = 0
+        self._dOut = ""
+        self._IO = None
         self.multipliers = None
         self.memory = None
         self._suppress_update = False
 
     def createGrid(self, rows, cols):
         self.memory = np.zeros((rows, cols), dtype=np.float32)
-        self.generateNoise()
+        self.multipliers = np.random.normal(loc=50, scale = 10, size = self.memory.shape)
+        np.save("Data/multipliers.npy", self.multipliers)
+        # self.multipliers = np.clip(self.multipliers, 0.0, 1.0)
+        print(self.multipliers)
+
 
     def loadGrid(self):
         self.memory = np.load("Data/memoryGrid.npy")
-        self.generateNoise()
+        self.multipliers = np.load("Data/multipliers.npy")
+        print(self.multipliers)
 
     def _update_logic(self):
         if self._suppress_update:
@@ -30,18 +36,24 @@ class OTP:
         if self._A is None or self.memory is None:
             return
         
-        length = math.log2(self.memory.shape[0])
-        row = decoder(self._A[int(length):len(self._A)])
-        col = decoder(self._A[0:int(length)])
+        length = self.memory.shape[0]-1
+        col = decoder(self._A)
 
         # print(self._D)
 
         if self._SEL == 1:
             if self._WE == 1:
-                self._D = self._D*self._VDD
-                self.write(row, col, self._D, self._SEL)
+                count = len(self._dIn)
+                for i in range(length, length-count, -1):
+                    self.write(col, i, self._dIn[count-1], self._SEL)
+                    count -= 1
             else:
-                self.read(row, col, self._SEL)
+                temp = []
+                for i in range(length+1):
+                    temp.append(self.read(col, i, self._SEL))
+                print(length)
+                self._dOut = hex(decoder(temp))
+                print(self._dOut)
 
     def write(self, row, col, _D, _SEL):
         if _SEL > 0:
@@ -50,29 +62,25 @@ class OTP:
     def read(self, row, col, _SEL):
         if _SEL > 0:
             out = self.memory[row, col]
-            print(compare(out, self._VRR))
-
-    def generateNoise(self):
-        self.multipliers = np.random.normal(loc=1.0, scale = 0.05, size = self.memory.shape)
-        # self.multipliers = np.clip(self.multipliers, 0.0, 1.0)
-        # print(self.multipliers)
+            return compare(out, self._VRR)
 
     def save(self):
         np.save("Data/memoryGrid.npy", self.memory)
 
-    def set_inputs(self, A=None, D=None, SEL=None, WE=None):
+    def set_inputs(self, A=None, dIn=None, SEL=None, WE=None, IO = None):
         self._suppress_update = True  # prevent logic update during batch assignment
         if A is not None:
             self._A = A
-        if D is not None:
-            self._D = D
+        if dIn is not None:
+            self._dIn = encoder(int(dIn, 16))
+        if IO is not None:
+            self._IO = IO
         if SEL is not None:
             self._SEL = SEL
         if WE is not None:
             self._WE = WE
         self._suppress_update = False
-        self._update_logic()  # 
-
+        self._update_logic() 
 
     @property
     def VDD(self):
@@ -144,11 +152,14 @@ class OTP:
 if __name__ == "__main__":
     test = OTP(5, 8, 0.4)
     test.createGrid(8, 8)
-    test.set_inputs(
-        A = [0, 0, 1, 0, 1, 0],
+    for i in range(8):
+        num = encoder(i)
+        test.set_inputs(
+        A = num,
+        dIn = "23",
         SEL = 1,
-        D = 1,
-        WE = 1
+        WE = 1,
+        IO = 0,
     )
     test.getGrid()
     test.save()
